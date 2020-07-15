@@ -28,11 +28,11 @@ TD = False
 L_span = 15 #centimetres
 v_d = 10/11 #m/s
 
-T_st = 2*L_span/(100*v_d)
+T_st = 0.08 # 2*L_span/(100*v_d)
 T_sw = 0.25 #sec
 
 T_stride = 0.33 #T_st + T_sw
-precision=0.05
+precision=0.01
 legNum=1
 S_st_i=0
 S_sw_i=0
@@ -129,14 +129,15 @@ t_TD_ref = t #initialized from TouchDown
 start=time.perf_counter()
 
 for i in range(0,1): #no. of cycles
-    
+    S_st_i=0
+    S_sw_i=0
     print('Cycle no: ' + str(i+1))
-
+    TD=False
     while(not TD):
         # if precision<loopTime:
         #     precision=precision+0.9*(loopTime-precision)
         loopStart=time.perf_counter()
-        time.sleep(precision+(0.2*loopTime))
+        time.sleep(precision+(0.5*loopTime))
         t_elapse_ref = t - t_TD_ref
         print(t_elapse_ref)
         TD=False
