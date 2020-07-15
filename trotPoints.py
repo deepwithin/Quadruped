@@ -12,8 +12,8 @@ from dxl_control.Ax12 import Ax12
 #----------variables---------------------------------------------
 
 # create motor object
-femur = Ax12(2)
-tibia = Ax12(1)
+M1 = Ax12(2)
+M2 = Ax12(1)
 
 # connecting
 Ax12.open_port()
@@ -32,7 +32,7 @@ T_st = 2*L_span/(100*v_d)
 T_sw = 0.25 #sec
 
 T_stride = 0.33 #T_st + T_sw
-precision=0.001
+precision=0.05
 legNum=1
 S_st_i=0
 S_sw_i=0
@@ -136,7 +136,7 @@ for i in range(0,1): #no. of cycles
         # if precision<loopTime:
         #     precision=precision+0.9*(loopTime-precision)
         loopStart=time.perf_counter()
-        time.sleep(precision+(0.75*loopTime))
+        time.sleep(precision+(0.2*loopTime))
         t_elapse_ref = t - t_TD_ref
         print(t_elapse_ref)
         TD=False
@@ -210,8 +210,8 @@ for i in range(0,1): #no. of cycles
                 print(angles)
             
             if legNum==1:
-                val1=int((angles[1]+120)*512/150)
-                val2=int((angles[2]+120)*512/150)
+                val1=int((angles[1]+150)*512/150)
+                val2=int((angles[2]+150)*512/150)
                 M1.set_position(val1)
                 M2.set_position(val2)
             legNum+=1
