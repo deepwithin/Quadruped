@@ -8,16 +8,17 @@ Created on Sun Jul  5 16:53:40 2020
 import time
 import math
 import numpy as np
-from dxl_control.Ax12 import Ax12
+import plotView3d as view3d
+# from dxl_control.Ax12 import Ax12
 #----------variables---------------------------------------------
 
-# create motor object
-M1 = Ax12(2)
-M2 = Ax12(1)
+# # create motor object
+# femur = Ax12(2)
+# tibia = Ax12(1)
 
-# connecting
-Ax12.open_port()
-Ax12.set_baudrate()
+# # connecting
+# Ax12.open_port()
+# Ax12.set_baudrate()
 
 
 
@@ -123,7 +124,8 @@ def legIK(x,y,z):
     gamma = (math.pi-psi)*180/math.pi
     return np.array([alpha,beta,gamma])
 #------------------------------------------------------------------
-
+view3d.drawPoints3d([0,0,0])
+view3d.drawCurve3d([[0,0,0],[15,0,-25.98]])
 t = 0.0 #clock started
 t_TD_ref = t #initialized from TouchDown
 start=time.perf_counter()
@@ -134,10 +136,10 @@ for i in range(0,1): #no. of cycles
     print('Cycle no: ' + str(i+1))
     TD=False
     while(not TD):
-        # if precision<loopTime:
-        #     precision=precision+0.9*(loopTime-precision)
+        if precision<loopTime:
+            precision=loopTime
+        time.sleep(precision-(0.75*loopTime))
         loopStart=time.perf_counter()
-        time.sleep(precision+(0.5*loopTime))
         t_elapse_ref = t - t_TD_ref
         print(t_elapse_ref)
         TD=False
@@ -172,7 +174,8 @@ for i in range(0,1): #no. of cycles
                 S_st_i = legTime/T_st
                 phase[legNum-1]=S_st_i
                 x=L_span*(1-2*S_st_i)+0
-                z=delta*(math.cos(math.pi*x/(2*L_span))+0)-18 #this zero is Po
+                z=delta*(math.cos(math.pi*x/(2*L_span))+0 )-18 #this 0 is Pox and 18 Poy
+                # view3d.drawPoints3d([x,y,z])
                 print('in current stance: '+ str(S_st_i))
                 print('Coords :'+'('+str(x)+', '+str(y)+', '+str(z)+')')
                 print('Angles :', end="")
@@ -189,6 +192,7 @@ for i in range(0,1): #no. of cycles
                 for index in range(0,12):
                     x+=bernstein(S_sw_i, 11, index, bezierControlPoints[index][0])
                     z+=bernstein(S_sw_i, 11, index, bezierControlPoints[index][1])
+                # view3d.drawPoints3d([x,y,z])
                 print('in old swing: '+ str(S_sw_i))
                 print('Coords :'+'('+str(x)+', '+str(y)+', '+str(z)+')')
                 print('Angles :', end="")
@@ -204,6 +208,7 @@ for i in range(0,1): #no. of cycles
                 for index in range(0,12):
                     x+=bernstein(S_sw_i, 11, index, bezierControlPoints[index][0])
                     z+=bernstein(S_sw_i, 11, index, bezierControlPoints[index][1])
+                # view3d.drawPoints3d([x,y,z])
                 print('in current swing: '+ str(S_sw_i))
                 print('Coords :'+'('+str(x)+', '+str(y)+', '+str(z)+')')
                 print('Angles :', end="")
@@ -211,10 +216,11 @@ for i in range(0,1): #no. of cycles
                 print(angles)
             
             if legNum==1:
+                view3d.drawPoints3d([x,y,z])
                 val1=int((angles[1]+150)*512/150)
                 val2=int((angles[2]+150)*512/150)
-                M1.set_position(val1)
-                M2.set_position(val2)
+                # M1.set_position(val1)
+                # M2.set_position(val2)
             legNum+=1
             print('----this leg done----\n')
         legNum=1
@@ -232,7 +238,7 @@ for i in range(0,1): #no. of cycles
 
 print('\n\nTotal time taken: '+str(time.perf_counter()-start)+' sec')
 
-# disconnect
-femur.disable_torque()
-tibia.disable_torque()
-Ax12.close_port()
+# # disconnect
+# femur.disable_torque()
+# tibia.disable_torque()
+# Ax12.close_port()
