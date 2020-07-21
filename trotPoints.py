@@ -82,6 +82,8 @@ femur=15
 tibia=15.5
 hip=0
 angles=[]
+beta_list=[]
+gamma_list=[]
 
 def nCr(n,r):
     f = math.factorial
@@ -124,6 +126,7 @@ def legIK(x,y,z):
     gamma = (math.pi-psi)*180/math.pi
     return np.array([alpha,beta,gamma])
 #------------------------------------------------------------------
+
 view3d.drawPoints3d([0,0,0])
 view3d.drawCurve3d([[0,0,0],[15,0,-25.98]])
 t = 0.0 #clock started
@@ -215,10 +218,12 @@ for i in range(0,1): #no. of cycles
                 angles=legIK(int(x), int(y), int(z))
                 print(angles)
             
-            if legNum==1:
+            if legNum==1: #change this no. to change leg
                 view3d.drawPoints3d([x,y,z])
-                val1=int((angles[1]+150)*512/150)
-                val2=int((angles[2]+150)*512/150)
+                val1=angles[1]*math.pi/180
+                val2=angles[2]*math.pi/180
+                beta_list.append(val1)
+                gamma_list.append(val2)
                 # M1.set_position(val1)
                 # M2.set_position(val2)
             legNum+=1
@@ -231,12 +236,11 @@ for i in range(0,1): #no. of cycles
         loopTime=loopEnd-loopStart
     print('\n========================this cycle done============================\n')
 
-# for j in range(0,34,1):
-#     # print(t_elapse_ref)
-#     t_i = t_elapse_ref - T_stride * dS_trot
-#     # print(t_i)
 
 print('\n\nTotal time taken: '+str(time.perf_counter()-start)+' sec')
+
+# beta_list
+# gamma_list
 
 # # disconnect
 # femur.disable_torque()
