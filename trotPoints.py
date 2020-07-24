@@ -1,14 +1,19 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[ ]:
+
+
 # -*- coding: utf-8 -*-
 """
 Created on Sun Jul  5 16:53:40 2020
-
 @author: Deep
 """
 
 import time
 import math
 import numpy as np
-import plotView3d as view3d
+# import plotView3d as view3d
 # from dxl_control.Ax12 import Ax12
 #----------variables---------------------------------------------
 
@@ -26,7 +31,8 @@ t_elapse_ref = 0 #variable initialised
 
 TD = False
 
-L_span = 15 #centimetres
+clr_height=7 # clearance height in cm
+L_span = 10 #centimetres
 v_d = 10/11 #m/s
 
 T_st = 0.08 # 2*L_span/(100*v_d)
@@ -44,7 +50,11 @@ loopStart=0
 loopEnd=0
 loopTime=0
 
-dS_trot=[0,0.5,0.5,0]
+# dS_trot=[0,0.2,0.55,0.75]#gallop
+dS_trot=[0,0.5,0.5,0]#trot
+# dS_trot=[0,0.75,0.5,0.25]#walk
+# dS_trot=[0,0,0.5,0.5]# pace
+# dS_trot=[0,0.5,0,0.5] # bound
 dS_trot=np.array(dS_trot)
 print(dS_trot)
 
@@ -61,20 +71,21 @@ x=0 #coordinates initialized
 y=0
 z=0
 
+bodyHeight=23
 delta=-2
 
-bezierControlPoints=[[-15,-18],
-                     [-21.04,-18],
-                     [-22.5,-7.58],
-                     [-22.5,-7.58],
-                     [-22.5,-7.58],
-                     [0,-7.58],
-                     [0,-7.58],
-                     [0,-4.6],
-                     [22.74,-4.6],
-                     [22.74,-4.6],
-                     [21.2,-18],
-                     [15,-18]]
+bezierControlPoints=[[-L_span,0.0-bodyHeight],
+                     [-L_span*1.4,0.0-bodyHeight],
+                     [-L_span*1.5,clr_height*0.9-bodyHeight],
+                     [-L_span*1.5,clr_height*0.9-bodyHeight],
+                     [-L_span*1.5,clr_height*0.9-bodyHeight],
+                     [0.0,clr_height*0.9-bodyHeight],
+                     [0.0,clr_height*0.9-bodyHeight],
+                     [0.0,clr_height*1.157-bodyHeight],
+                     [L_span*1.5,clr_height*1.157-bodyHeight],
+                     [L_span*1.5,clr_height*1.157-bodyHeight],
+                     [L_span*1.4,0.0-bodyHeight],
+                     [L_span,0.0-bodyHeight]]
 bezierControlPoints=np.array(bezierControlPoints)
 # k belongs to 0,1,2...11 for 12 bezier contol points
 
@@ -84,6 +95,20 @@ hip=0
 angles=[]
 beta_list=[]
 gamma_list=[]
+beta_list2=[]
+gamma_list2=[]
+beta_list3=[]
+gamma_list3=[]
+beta_list4=[]
+gamma_list4=[]
+x_list1 = []
+z_list1 = []
+x_list2 = []
+z_list2 = []
+x_list3 = []
+z_list3 = []
+x_list4 = []
+z_list4 = []
 
 def nCr(n,r):
     f = math.factorial
@@ -127,8 +152,8 @@ def legIK(x,y,z):
     return np.array([alpha,beta,gamma])
 #------------------------------------------------------------------
 
-view3d.drawPoints3d([0,0,0])
-view3d.drawCurve3d([[0,0,0],[15,0,-25.98]])
+# view3d.drawPoints3d([0,0,0])
+# view3d.drawCurve3d([[0,0,0],[15,0,-25.98]])
 t = 0.0 #clock started
 t_TD_ref = t #initialized from TouchDown
 start=time.perf_counter()
@@ -139,9 +164,9 @@ for i in range(0,1): #no. of cycles
     print('Cycle no: ' + str(i+1))
     TD=False
     while(not TD):
-        if precision<loopTime:
-            precision=loopTime
-        time.sleep(precision-(0.75*loopTime))
+#         if precision<loopTime:
+#             precision=loopTime
+#         time.sleep(precision-(0.75*loopTime))
         loopStart=time.perf_counter()
         t_elapse_ref = t - t_TD_ref
         print(t_elapse_ref)
@@ -177,12 +202,12 @@ for i in range(0,1): #no. of cycles
                 S_st_i = legTime/T_st
                 phase[legNum-1]=S_st_i
                 x=L_span*(1-2*S_st_i)+0
-                z=delta*(math.cos(math.pi*x/(2*L_span))+0 )-18 #this 0 is Pox and 18 Poy
+                z=delta*(math.cos(math.pi*x/(2*L_span))+0 )- bodyHeight #this 0 is Pox and 18 Poy
                 # view3d.drawPoints3d([x,y,z])
                 print('in current stance: '+ str(S_st_i))
                 print('Coords :'+'('+str(x)+', '+str(y)+', '+str(z)+')')
                 print('Angles :', end="")
-                angles=legIK(int(x), int(y), int(z))
+                angles=legIK(x, y, z)
                 print(angles)
                 
                 
@@ -199,7 +224,7 @@ for i in range(0,1): #no. of cycles
                 print('in old swing: '+ str(S_sw_i))
                 print('Coords :'+'('+str(x)+', '+str(y)+', '+str(z)+')')
                 print('Angles :', end="")
-                angles=legIK(int(x), int(y), int(z))
+                angles=legIK(x, y, z)
                 print(angles)
                 
             elif legTime>= T_st and legTime<=T_stride: #current swing phase active
@@ -215,17 +240,49 @@ for i in range(0,1): #no. of cycles
                 print('in current swing: '+ str(S_sw_i))
                 print('Coords :'+'('+str(x)+', '+str(y)+', '+str(z)+')')
                 print('Angles :', end="")
-                angles=legIK(int(x), int(y), int(z))
+                angles=legIK(x, y, z)
                 print(angles)
             
             if legNum==1: #change this no. to change leg
-                view3d.drawPoints3d([x,y,z])
+#                 view3d.drawPoints3d([x,y,z])
                 val1=angles[1]*math.pi/180
                 val2=angles[2]*math.pi/180
                 beta_list.append(val1)
                 gamma_list.append(val2)
+                x_list1.append(x)
+                z_list1.append(z)
                 # M1.set_position(val1)
                 # M2.set_position(val2)
+                        
+            if legNum==2: #change this no. to change leg
+#                 view3d.drawPoints3d([x,y,z])
+                val1=angles[1]*math.pi/180
+                val2=angles[2]*math.pi/180
+                beta_list2.append(val1)
+                gamma_list2.append(val2)
+                x_list2.append(x)
+                z_list2.append(z)
+                
+                
+            if legNum==3: #change this no. to change leg
+#                 view3d.drawPoints3d([x,y,z])
+                val1=angles[1]*math.pi/180
+                val2=angles[2]*math.pi/180
+                beta_list3.append(val1)
+                gamma_list3.append(val2)
+                x_list3.append((int(x) + 40))
+                z_list3.append(z)
+            
+            
+            if legNum==4: #change this no. to change leg
+#                 view3d.drawPoints3d([x,y,z])
+                val1=angles[1]*math.pi/180
+                val2=angles[2]*math.pi/180
+                beta_list4.append(val1)
+                gamma_list4.append(val2)
+                x_list4.append((int(x)+40))
+                z_list4.append(z)
+                
             legNum+=1
             print('----this leg done----\n')
         legNum=1
@@ -239,10 +296,11 @@ for i in range(0,1): #no. of cycles
 
 print('\n\nTotal time taken: '+str(time.perf_counter()-start)+' sec')
 
-# beta_list
+#  beta_list
 # gamma_list
 
 # # disconnect
 # femur.disable_torque()
 # tibia.disable_torque()
 # Ax12.close_port()
+
