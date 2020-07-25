@@ -1,12 +1,6 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
-
 def Four_Leg_Simulation(beta_list, gamma_list, beta_list2, gamma_list2, beta_list3, gamma_list3, beta_list4, gamma_list4):
     """" This function takes eight list containing beta(shoulder) and gamma(knee) angles
-         One Leg Simulation code by Hritik Gupta date = 21/07/2020 """
+         four Leg Simulation code by Hritik Gupta date = 25/07/2020 """
     
     #import necessary packages
     import numpy as np 
