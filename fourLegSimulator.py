@@ -1,22 +1,19 @@
-def Four_Leg_Simulation(beta_list, gamma_list, beta_list2, gamma_list2, beta_list3, gamma_list3, beta_list4, gamma_list4):
-    """" This function takes eight list containing beta(shoulder) and gamma(knee) angles
-         four Leg Simulation code by Hritik Gupta date = 25/07/2020 """
+def fourLegSimulator(beta_list, gamma_list, beta_list2, gamma_list2, beta_list3, gamma_list3, beta_list4, gamma_list4, bodyHeight, femur, tibia):
+    """" This function takes eight lists containing beta(shoulder) and gamma(knee) angles and body height four Leg Simulator code animated in 2D by Hritik Gupta date = 25/07/2020 """
     
     #import necessary packages
     import numpy as np 
     import itertools # This package is specifically used for having multiple variable "for" loop using zip function
     from numpy import pi, sin, cos, sqrt
     import matplotlib.pyplot as plt
-    import matplotlib.animation as animation 
-    from matplotlib import rc
+    import matplotlib.animation as animation
     get_ipython().run_line_magic('matplotlib', 'qt')
 
 
 
     # input parameters
-    Femur_one_leg = 15.0 # Length of femur (upper bone)
-    Tibia_one_leg = 15.5 # Length of Tibia (lower bone)
-
+    Femur_one_leg = femur # Length of femur (upper bone)
+    Tibia_one_leg = tibia # Length of Tibia (lower bone)
 
 
     # Making arrays for containing value of respective coordinates
@@ -168,4 +165,3 @@ def Four_Leg_Simulation(beta_list, gamma_list, beta_list2, gamma_list2, beta_lis
     plt.plot([-4,44],[5,5],'red')
     
     return None
-

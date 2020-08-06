@@ -52,43 +52,42 @@ dS = []
 dS = dS_trot
 print(dS_trot)
 
-t1=0
-t2=0
-t3=0
-t4=0
 t_elapse_ref=0.0 #change this value between 0 and 0.33(stride time)
 
-t_i=[t1,t2,t3,t4]
-t_i=np.array(t_i)
 
 x=0 #coordinates initialized
 y=0
 z=0
 
 lateral_fraction=0
-bodyHeight=18
+bodyHeight=24
 delta=-0.15
+
+x_f=30 #cm
+z_f=20 #cm
+stair_angle=math.atan(z_f/x_f)
+L_span=math.sqrt(x_f**2 + z_f**2)/2
 
 t_gt = 0.02 #transition starting time
 dT_gt = 0.10 #duration of gait transition
 
-bezierControlPoints=[[-L_span,0.0-bodyHeight],
-                     [-L_span*1.4,0.0-bodyHeight],
-                     [-L_span*1.5,clr_height*0.9-bodyHeight],
-                     [-L_span*1.5,clr_height*0.9-bodyHeight],
-                     [-L_span*1.5,clr_height*0.9-bodyHeight],
-                     [0.0,clr_height*0.9-bodyHeight],
-                     [0.0,clr_height*0.9-bodyHeight],
-                     [0.0,clr_height*1.157-bodyHeight],
-                     [L_span*1.5,clr_height*1.157-bodyHeight],
-                     [L_span*1.5,clr_height*1.157-bodyHeight],
-                     [L_span*1.4,0.0-bodyHeight],
-                     [L_span,0.0-bodyHeight]]
+bezierControlPoints=[[0-x_f/2, 0-z_f/2-bodyHeight],
+                     [-0.3*x_f-x_f/2, 0.5*z_f-z_f/2-bodyHeight],
+                     [0.4*x_f-x_f/2, 1.3*z_f-z_f/2-bodyHeight],
+                     [0.4*x_f-x_f/2, 1.3*z_f-z_f/2-bodyHeight],
+                     [0.4*x_f-x_f/2, 1.3*z_f-z_f/2-bodyHeight],
+                     [0.9*x_f-x_f/2, 1.4*z_f-z_f/2-bodyHeight],
+                     [0.9*x_f-x_f/2, 1.3*z_f-z_f/2-bodyHeight],
+                     [0.9*x_f-x_f/2, 1.3*z_f-z_f/2-bodyHeight],
+                     [1.1*x_f-x_f/2, 1.4*z_f-z_f/2-bodyHeight],
+                     [1.1*x_f-x_f/2, 1.4*z_f-z_f/2-bodyHeight],
+                     [1.2*x_f-x_f/2, z_f-z_f/2-bodyHeight],
+                     [x_f-x_f/2, z_f-z_f/2-bodyHeight]]
 bezierControlPoints=np.array(bezierControlPoints)
 # k belongs to 0,1,2...11 for 12 bezier contol points
 
-femur=12
-tibia=11.5
+femur=20
+tibia=18.5
 hip=0
 angles=[]
 alpha_list=[]
@@ -155,8 +154,8 @@ def legIK(x,y,z):
     return np.array([alpha,beta,gamma])
 
 def lateralMotion(lateral_fraction, x):
-    X_POLAR = np.cos(lateral_fraction)
-    Y_POLAR = np.sin(lateral_fraction)
+    X_POLAR = np.cos(lateral_fraction*(math.pi/2))
+    Y_POLAR = np.sin(lateral_fraction*(math.pi/2))
     
     stepX = x * X_POLAR
     stepY = x * Y_POLAR
@@ -179,6 +178,16 @@ def gaitTransition(t, t_gt, dT_gt, current_gait, target_gait):
     print(dS)
     return dS
 
+def rotateAxesForStair2(a, x, z):
+    T_rot=np.array([[np.cos(a), -np.sin(a)], [np.sin(a), np.cos(a)]])
+    xz_input=np.array([[x],[z]])
+    xz_output=T_rot*xz_input
+    return xz_output[0][0], xz_output[1][0]
+
+def rotateAxesForStair(a, x, z):
+    x_out=x*math.cos(a)-z*math.sin(a)
+    z_out=x*math.sin(a)+z*math.cos(a)
+    return x_out, z_out
 #------------------------------------------------------------------
 
 view3d.drawPoints3d([0,0,0])
@@ -234,7 +243,9 @@ for i in range(0,1): #no. of cycles
                 S_st_i = legTime/T_st
                 phase[legNum-1]=S_st_i
                 x=L_span*(1-2*S_st_i)+0
-                z=delta*(math.cos(math.pi*x/(2*L_span))+0 )- bodyHeight #this 0 is Pox and 18 Poy
+                z=delta*(math.cos(math.pi*x/(2*L_span))+0 ) #this 0 is Pox and 18 Poy
+                x,z=rotateAxesForStair(stair_angle, x, z)
+                z=z-bodyHeight
                 x,y=lateralMotion(lateral_fraction,x)
                 # y+=helix
                 print('in current stance: '+ str(S_st_i))
